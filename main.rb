@@ -22,21 +22,3 @@
 
       # puts 'nearl enddd'
       # closest = Day3.get_lowest_cost_intersection(corr1, corr2)
-
-
-def foo(x)
-  x = x.to_i
-  while x < 10
-    if x == 1
-      puts "1"
-      x += 1
-    elsif x ==5
-      puts "5"
-      return x
-    end
-    puts "nex loop #{x}"
-    x += 1
-  end
-  puts "out of loop! #{x}"
-  x
-end
