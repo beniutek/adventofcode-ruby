@@ -46,10 +46,10 @@ module Day9
           puts "04: RET VAL: #{@output}" if debug
           return @output
         elsif opcode == '05'
-          @position = new_pointer_value(:>, modes, 0, @position + 3)
+          @position = new_pointer_value(:>, modes)
           puts "new position: #{@position}" if debug
         elsif opcode == '06'
-          @position = new_pointer_value(:==, modes, 0, @position + 3)
+          @position = new_pointer_value(:==, modes)
           puts "new position: #{@position}" if debug
         elsif opcode == '07'
           val = get_value_to_store(:<, modes)
@@ -115,14 +115,15 @@ module Day9
     def get_value_to_store(condition, modes)
       first_param = get_value(@position + 1, mode: modes[0])
       second_param = get_value(@position + 2, mode: modes[1])
+
       first_param.send(condition, second_param) ? 1 : 0
     end
 
-    def new_pointer_value(condition, modes = [], param = 0, fallback_value = nil)
+    def new_pointer_value(condition, modes = [])
       first_param = get_value(@position + 1, mode: modes[0])
       second_param = get_value(@position + 2, mode: modes[1])
 
-      first_param.send(condition, param) ? second_param : fallback_value
+      first_param.send(condition, 0) ? second_param : (@position + 3)
     end
 
     def perform(instruction, modes: [])
