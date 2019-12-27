@@ -14,20 +14,6 @@ module Day12
       adjust_velocities(moon)
     end
 
-    def apply_gravity_one_dimension(moon, dimension)
-      if position[dimension] > moon.position[dimension]
-        @velocity[dimension] -= 1
-        moon.adjust_velocity(dimension, 1)
-      else
-        @velocity[dimension] += 1
-        moon.adjust_velocity(dimension, -1)
-      end
-    end
-
-    def apply_one_dimension_velocity(dimension)
-      @position[dimension] = @position[dimension] + @velocity[dimension]
-    end
-
     def adjust_velocities(moon)
       position.each_with_index do |val, i|
         if val > moon.position[i]
@@ -75,25 +61,9 @@ module Day12
     end
 
     def move_one_step
-      moons[0].apply_gravity(moons[1])
-      moons[0].apply_gravity(moons[2])
-      moons[0].apply_gravity(moons[3])
-      moons[1].apply_gravity(moons[2])
-      moons[1].apply_gravity(moons[3])
-      moons[2].apply_gravity(moons[3])
+      moons.combination(2).map { |a, b| a.apply_gravity(b) }
 
       moons.map(&:apply_velocity)
-    end
-
-    def move_one_dimension(dimension)
-      moons[0].apply_gravity_one_dimension(moons[1], dimension)
-      moons[0].apply_gravity_one_dimension(moons[2], dimension)
-      moons[0].apply_gravity_one_dimension(moons[3], dimension)
-      moons[1].apply_gravity_one_dimension(moons[2], dimension)
-      moons[1].apply_gravity_one_dimension(moons[3], dimension)
-      moons[2].apply_gravity_one_dimension(moons[3], dimension)
-
-      moons.map { |moon| moon.apply_one_dimension_velocity(dimension) }
     end
 
     def energy
@@ -110,7 +80,7 @@ module Day12
     def current_state(dimension)
       moons.map do |moon|
         [moon.position[dimension], moon.velocity[dimension]]
-      end.flatten
+      end
     end
 
     def velocity
@@ -131,20 +101,20 @@ module Day12
     end
 
     def part2
-      # io = Moon.new(5, 13, -3, 'Io')
-      # europa = Moon.new(18, -7, 13, 'Europa')
-      # ganymede = Moon.new(16, 3, 4, 'Ganymede')
-      # callisto = Moon.new(0, 8, 8, 'Callisto')
+      io = Moon.new(5, 13, -3, 'Io')
+      europa = Moon.new(18, -7, 13, 'Europa')
+      ganymede = Moon.new(16, 3, 4, 'Ganymede')
+      callisto = Moon.new(0, 8, 8, 'Callisto')
 
       # io = Moon.new(-8, -10, 0, 'Io')
       # europa = Moon.new(5, 5, 10, 'Europa')
       # ganymede = Moon.new(2, -7, 3, 'Ganymede')
       # callisto = Moon.new(9, -8, -3, 'Callisto')
 
-      io = Moon.new(-1, 0, 2, 'Io')
-      europa = Moon.new(2, -10, -7, 'Europa')
-      ganymede = Moon.new(4, -8, 8, 'Ganymede')
-      callisto = Moon.new(3, 5, -1, 'Callisto')
+      # io = Moon.new(-1, 0, 2, 'Io')
+      # europa = Moon.new(2, -10, -7, 'Europa')
+      # ganymede = Moon.new(4, -8, 8, 'Ganymede')
+      # callisto = Moon.new(3, 5, -1, 'Callisto')
 
       space = Space.new([io, europa, ganymede, callisto])
       start_x_state = space.current_state(0).dup
@@ -153,39 +123,27 @@ module Day12
 
       count_x, count_y, count_z = 0, 0, 0
       x, y, z = true, true, true
-      i = 0
+
       while x || y || z
-        i += 1
+        space.move_one_step
+
         if x
-          space.move_one_dimension(0)
           count_x += 1
+          x = false if space.current_state(0) == start_x_state
         end
 
         if y
-          space.move_one_dimension(1)
           count_y += 1
+          y = false if space.current_state(1) == start_y_state
         end
 
         if z
-          space.move_one_dimension(2)
           count_z += 1
-        end
-
-        if space.current_state(0) == start_x_state
-          x = false
-        end
-
-        if space.current_state(1) == start_y_state
-          y = false
-        end
-
-        if space.current_state(2) == start_z_state
-          z = false
+          z = false if space.current_state(2) == start_z_state
         end
       end
-      puts i
-      puts ";;;;"
-      { space: space, count: [count_x, count_y, count_z] }
+
+      [count_x, count_y, count_z].reduce(1, :lcm)
     end
   end
 end
